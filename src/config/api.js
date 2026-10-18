@@ -1,4 +1,4 @@
-// Backend server root, set in mobile/.env (EXPO_PUBLIC_API_URL).
+// Backend server root, set in mobile/.env (EXPO_PUBLIC_API_URL)..
 // To use a local backend, override it in mobile/.env.local, e.g.
 // EXPO_PUBLIC_API_URL=http://192.168.0.10:8000
 export const API_ROOT = (
