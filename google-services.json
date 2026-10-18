@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1096833485905",
+    "project_id": "word-per-day-a653f",
+    "storage_bucket": "word-per-day-a653f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1096833485905:android:dde001839e59691707bc70",
+        "android_client_info": {
+          "package_name": "com.abdul_khalek.mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYSLqkQoHOPMkVr4Z9F4JNt27fbaDWs50"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
