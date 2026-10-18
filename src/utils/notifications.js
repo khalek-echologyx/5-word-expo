@@ -12,6 +12,7 @@
  *       builds.  The function is a no-op (returns null silently) on the
  *       Expo Go simulator.
  */
+import Constants from "expo-constants";
 import * as Notifications from "expo-notifications";
 import { Platform } from "react-native";
 
@@ -31,7 +32,7 @@ Notifications.setNotificationHandler({
  * Returns the IANA timezone string for the current device.
  * Falls back to "UTC" if unavailable.
  */
-function getDeviceTimezone() {
+export function getDeviceTimezone() {
   try {
     return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
   } catch {
@@ -48,6 +49,16 @@ function getDeviceTimezone() {
  */
 export async function requestNotificationPermission() {
   try {
+    // Android 13+ only shows the permission prompt once a channel exists.
+    // The backend sends to this channel id (see notifications/scheduler.py).
+    if (Platform.OS === "android") {
+      await Notifications.setNotificationChannelAsync("daily-reminder", {
+        name: "Daily reminder",
+        importance: Notifications.AndroidImportance.HIGH,
+        sound: "default",
+      });
+    }
+
     // On Android < 13 permissions are granted automatically.
     if (Platform.OS === "android" && Platform.Version < 33) {
       return true;
@@ -88,7 +99,10 @@ export async function setupNotifications(authToken) {
 
     // getExpoPushTokenAsync requires a physical device or development build.
     // On Expo Go (simulator) this will throw — we catch it gracefully.
-    const tokenData = await Notifications.getExpoPushTokenAsync();
+    const projectId =
+      Constants.expoConfig?.extra?.eas?.projectId ??
+      Constants.easConfig?.projectId;
+    const tokenData = await Notifications.getExpoPushTokenAsync({ projectId });
     const pushToken = tokenData.data;
 
     if (!pushToken) {

@@ -23,6 +23,10 @@ import {
     getNotificationSettings,
     updateNotificationSettings,
 } from "../api/notifications";
+import {
+    getDeviceTimezone,
+    setupNotifications,
+} from "../utils/notifications";
 
 // Simple time-picker rendered as two numeric buttons (hour / minute).
 // A full DateTimePicker library would need extra native setup, so we use
@@ -133,7 +137,9 @@ export default function NotificationSettingsScreen() {
 
     const [isEnabled, setIsEnabled] = useState(true);
     const [notificationTime, setNotificationTime] = useState("08:00");
-    const [timezone, setTimezone] = useState("UTC");
+    // Always use the phone's current timezone, not the stored one, so the
+    // reminder fires at the chosen local time even after travelling.
+    const timezone = getDeviceTimezone();
 
     // ------------------------------------
     // Load current settings from backend
@@ -152,7 +158,6 @@ export default function NotificationSettingsScreen() {
                     ? data.notification_time.slice(0, 5)
                     : "08:00"
             );
-            setTimezone(data.timezone || "UTC");
         } catch (error) {
             console.log("Failed to load notification settings:", error.message);
             Alert.alert(
@@ -183,10 +188,24 @@ export default function NotificationSettingsScreen() {
                 timezone,
             });
 
+            // Make sure this device's push token is registered; without it
+            // the backend has nowhere to send the reminder.
+            const pushToken = isEnabled
+                ? await setupNotifications(token)
+                : null;
+
+            if (isEnabled && !pushToken) {
+                Alert.alert(
+                    "Notifications blocked",
+                    "Your time was saved, but this phone hasn't allowed notifications. Enable them for this app in your phone's Settings, then save again."
+                );
+                return;
+            }
+
             Alert.alert(
                 "Saved",
                 isEnabled
-                    ? `Daily reminder set for ${notificationTime}.`
+                    ? `Daily reminder set for ${notificationTime} (${timezone}).`
                     : "Daily reminders disabled."
             );
         } catch (error) {
